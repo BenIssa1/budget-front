@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/sidebar"
 import Link from "next/link"
 import { ChevronRight } from "lucide-react"
+import { UserRole } from "@/types/auth"
 
 export function NavMain({
   items,
@@ -29,9 +30,11 @@ export function NavMain({
     title: string
     url: string
     icon?: Icon
+    roles?: UserRole[]
     items?: {
       title: string
       url: string
+      roles?: UserRole[]
     }[]
   }[]
 }) {

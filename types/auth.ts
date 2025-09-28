@@ -3,7 +3,7 @@ export interface User {
   lastName: string;
   firstName: string;
   email: string;
-  role: string;
+  role: Role;
 }
 
 export interface LoginFormValues {
@@ -47,4 +47,13 @@ export interface UserListResponse {
   data: {
     users: User[]
   }
+}
+
+export type Role = "User" | "Admin";
+
+export type UserRole = "User" | "Admin";
+
+export enum RoleName {
+  USER = "User",
+  ADMIN = "Admin"
 }

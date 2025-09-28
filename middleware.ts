@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { decryptData, isTokenExpired } from "@/lib/crypto";
+import { Role, User } from "./types/auth";
 
 const ROUTES = {
     public: ["/", "forgot-password", "otp", "new-password"], // page d'accueil seulement
@@ -16,6 +17,28 @@ const ROUTES = {
 
 const TOKEN_NAME = process.env.NEXT_PUBLIC_NAME_TOKEN as string;
 const TOKEN_USER_NAME = process.env.NEXT_PUBLIC_NAME_USER as string;
+
+// Permissions par route - Structure moderne et lisible
+const ROUTE_PERMISSIONS: Record<string, string[]> = {
+    // Routes admin exclusif
+    "/config": ["Admin"],
+    "/user": ["Admin"],
+};
+
+// Fonction utilitaire pour vérifier l'accès
+const hasAccess = (path: string, role: Role | undefined ): boolean => {
+    // Trouver la route correspondante
+    const restrictedRoute = Object.entries(ROUTE_PERMISSIONS).find(([route]) =>
+        path.startsWith(route)
+    );
+
+    // Si pas de restriction trouvée, accès autorisé
+    if (!restrictedRoute) return true;
+
+    // Vérifier si le rôle est dans la liste autorisée
+    const [, allowedRoles] = restrictedRoute;
+    return allowedRoles.some((r) => r === role);
+};
 
 const createRedirect = (
     url: string,
@@ -37,9 +60,12 @@ const createRedirect = (
 export async function middleware(req: NextRequest) {
     const path = req.nextUrl.pathname;
     const token = req.cookies.get(TOKEN_NAME)?.value;
+    const tokenUser = req.cookies.get(TOKEN_USER_NAME)?.value;
+    const decryptedToken = await decryptData(token);
+    const decryptedTokenUser = await decryptData(tokenUser);
 
     const isPublic = ROUTES.public.some((route) => path === `/${route.replace(/^\/?/, "")}`);
-    const isProtected = ROUTES.protected.some((route) => path.startsWith(route));
+    const isProtectedRoute = ROUTES.protected.some((route) => path === route || path.startsWith(`${route}/`));
 
     // 🔒 Cas 1 : route publique ("/")
     if (isPublic) {
@@ -56,22 +82,30 @@ export async function middleware(req: NextRequest) {
         return NextResponse.next(); // Non connecté → OK pour accéder à /
     }
 
-    // 🔐 Cas 2 : route protégée
-    if (isProtected) {
+    if (isProtectedRoute) {
+        // Pas de token = redirection login
         if (!token) {
-            return createRedirect("/", req); // Non connecté → retour à /
+            const loginUrl = new URL("/", req.url);
+            loginUrl.searchParams.set("redirect", encodeURI(req.url));
+            return createRedirect("/", req, true);
         }
 
         try {
-            const decryptedToken = await decryptData(token);
+            const { role }: User = JSON.parse(decryptedTokenUser as string);
             if (!decryptedToken || isTokenExpired(decryptedToken)) {
-                return createRedirect("/", req, true); // Token invalide ou expiré → clear
+                return createRedirect("/", req, true);
             }
-        } catch {
-            return createRedirect("/", req, true); // Erreur déchiffrement → clear
-        }
 
-        return NextResponse.next(); // Token OK → accès autorisé
+            // Vérifier les permissions par rôle
+            if (!hasAccess(path, role)) {
+                return createRedirect("/unauthorized", req);
+            }
+
+            return NextResponse.next();
+        } catch (error) {
+            console.error("Erreur middleware:", error);
+            return createRedirect("/", req, true);
+        }
     }
 
     // Toutes les autres routes passent
