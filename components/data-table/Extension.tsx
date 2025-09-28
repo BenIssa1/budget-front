@@ -95,10 +95,10 @@ export default function ExtensionTable({ buttonComponent, onBonusClick, onBudget
                                 Donner un bonus
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => onBudgetClick?.(extension)}>
-                                Ajouter un budget
+                                Attribuer un budget
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => onServiceClick?.(extension)}>
-                                Ajouter un service
+                                Intégrer un service
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>

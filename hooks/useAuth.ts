@@ -51,13 +51,13 @@ export function useAuth() {
         const encryptUser = await encryptData(JSON.stringify(userData));
 
         Cookies.set(TOKEN_NAME, encryptToken, {
-            secure: process.env.NODE_ENV === "production",
+            secure: false,
             sameSite: "strict",
             expires: 1 / 3,
         });
 
         Cookies.set(TOKEN_USER_NAME, encryptUser, {
-            secure: process.env.NODE_ENV === "production",
+            secure: false,
             sameSite: "strict",
             expires: 1 / 3,
         });
