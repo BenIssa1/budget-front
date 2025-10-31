@@ -7,6 +7,10 @@ export interface ExtensionConsumption {
   durationMinutes: number;
   cost: number;
   balance: number;
+  monthlyBudget: number;
+  budgetLabel: string;
+  remainingBudget: number;
+  budgetUsagePercentage: number;
 }
 
 export interface Period {

@@ -327,7 +327,7 @@ export function ExtensionConsumptionTable() {
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
-                      {formatCurrency(extension.balance)}
+                      {formatCurrency(extension.monthlyBudget)}
                     </TableCell>
                     <TableCell className="text-center">
                       <Badge 
