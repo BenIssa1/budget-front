@@ -296,6 +296,7 @@ export function ExtensionConsumptionTable() {
                 <TableHead className="text-center">Durée</TableHead>
                 <TableHead className="text-right">Coût</TableHead>
                 <TableHead className="text-right">Solde</TableHead>
+                <TableHead className="text-right">Budget</TableHead>
                 <TableHead className="text-center">Statut</TableHead>
               </TableRow>
             </TableHeader>
@@ -325,6 +326,9 @@ export function ExtensionConsumptionTable() {
                         <IconCurrencyDollar className="size-4 text-muted-foreground" />
                         {formatCurrency(extension.cost)}
                       </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {formatCurrency(extension.remainingBudget)}
                     </TableCell>
                     <TableCell className="text-right">
                       {formatCurrency(extension.monthlyBudget)}
